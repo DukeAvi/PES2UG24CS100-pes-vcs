@@ -194,7 +194,7 @@ int head_update(const ObjectID *new_commit) {
 //
 // Returns 0 on success, -1 on error.
 int commit_create(const char *message, ObjectID *commit_id_out) {
-    if (message == NULL || commit_id_out == NULL) {
+    if (!message || !commit_id_out) {
         return -1;
     }
 
@@ -203,21 +203,33 @@ int commit_create(const char *message, ObjectID *commit_id_out) {
         return -1;
     }
 
-    Commit commit;
-    memset(&commit, 0, sizeof(commit));
-    commit.tree = tree_id;
+    Commit c;
+    memset(&c, 0, sizeof(c));
+    c.tree = tree_id;
 
-    const int parent_found = (head_read(&commit.parent) == 0);
-    commit.has_parent = parent_found ? 1 : 0;
+    int has_parent = (head_read(&c.parent) == 0);
+    c.has_parent = has_parent ? 1 : 0;
 
-    snprintf(commit.author, sizeof(commit.author), "%s", pes_author());
-    commit.timestamp = (uint64_t)time(NULL);
-    snprintf(commit.message, sizeof(commit.message), "%s", message);
+    snprintf(c.author, sizeof(c.author), "%s", pes_author());
+    c.timestamp = (uint64_t)time(NULL);
+    snprintf(c.message, sizeof(c.message), "%s", message);
 
     void *raw = NULL;
     size_t raw_len = 0;
-    if (commit_serialize(&commit, &raw, &raw_len) != 0) return -1;
+    if (commit_serialize(&c, &raw, &raw_len) != 0) {
+        return -1;
+    }
 
+    int write_rc = object_write(OBJ_COMMIT, raw, raw_len, commit_id_out);
     free(raw);
 
+    if (write_rc != 0) {
+        return -1;
+    }
+
+    if (head_update(commit_id_out) != 0) {
+        return -1;
+    }
+
+    return 0;
 }
