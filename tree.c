@@ -18,6 +18,8 @@
 #include <sys/stat.h>
 #include "tree.h"
 
+int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out);
+
 // ─── Mode Constants ─────────────────────────────────────────────────────────
 
 #define MODE_FILE      0100644
@@ -252,8 +254,12 @@ static int build_tree_level(const TreeIndex *index, const char *prefix, ObjectID
 //
 // Returns 0 on success, -1 on error.
 int tree_from_index(ObjectID *id_out) {
-    // TODO: Implement recursive tree building
-    // (See Lab Appendix for logical steps)
-    (void)id_out;
-    return -1;
+    if (id_out == NULL) return -1;
+
+    TreeIndex index;
+    int res = load_index_for_tree(&index);
+    if (res != 0) return -1;
+    if (index.count == 0) return -1;
+
+    return build_tree_level(&index, "", id_out);
 }
