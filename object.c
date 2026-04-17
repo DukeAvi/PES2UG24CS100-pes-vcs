@@ -141,7 +141,19 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
     if (header_written < 0 || (size_t)header_written >= sizeof(header) - 1) return -1;
     size_t header_len = (size_t)header_written + 1;
 
-    (void)header;
-    (void)header_len;
+    size_t full_len = header_len + len;
+    uint8_t *full_obj = malloc(full_len);
+    if (!full_obj) return -1;
+
+    memcpy(full_obj, header, header_len);
+    if (len > 0) memcpy(full_obj + header_len, data, len);
+
+    compute_hash(full_obj, full_len, id_out);
+    if (object_exists(id_out)) {
+        free(full_obj);
+        return 0;
+    }
+
+    free(full_obj);
     return -1;
 }
