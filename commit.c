@@ -209,4 +209,8 @@ int commit_create(const char *message, ObjectID *commit_id_out) {
 
     const int parent_found = (head_read(&commit.parent) == 0);
     commit.has_parent = parent_found ? 1 : 0;
+
+    snprintf(commit.author, sizeof(commit.author), "%s", pes_author());
+    commit.timestamp = (uint64_t)time(NULL);
+    snprintf(commit.message, sizeof(commit.message), "%s", message);
 }
