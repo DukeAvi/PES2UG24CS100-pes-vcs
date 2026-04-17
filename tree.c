@@ -222,9 +222,9 @@ static int build_tree_level(const TreeIndex *index, const char *prefix, ObjectID
 
         if (tree.count >= MAX_TREE_ENTRIES) return -1;
         TreeEntry *entry = &tree.entries[tree.count++];
-        entry->mode = index->entries[i].mode;
-        entry->hash = index->entries[i].hash;
-        snprintf(entry->name, sizeof(entry->name), "%s", rest);
+        entry->mode = MODE_DIR;
+        entry->hash = child_id;
+        snprintf(entry->name, sizeof(entry->name), "%s", dir_name);
     }
 
     if (tree.count == 0) return -1;
