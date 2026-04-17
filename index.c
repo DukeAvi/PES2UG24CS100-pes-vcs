@@ -19,10 +19,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <errno.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
+
+int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out);
 
 // ─── PROVIDED ────────────────────────────────────────────────────────────────
 
@@ -303,6 +308,18 @@ if (object_write(OBJ_BLOB, data, data_len, &blob_id) != 0) {
 }
 free(data);
 
-(void)blob_id;
-    return -1;
+IndexEntry *entry = index_find(index, path);
+if (!entry) {
+    if (index->count >= MAX_INDEX_ENTRIES) return -1;
+    entry = &index->entries[index->count];
+    index->count++;
+}
+
+entry->mode = (st.st_mode & S_IXUSR) ? 0100755 : 0100644;
+entry->hash = blob_id;
+entry->mtime_sec = (uint64_t)st.st_mtime;
+entry->size = (uint32_t)st.st_size;
+snprintf(entry->path, sizeof(entry->path), "%s", path);
+
+return index_save(index);
 }
