@@ -127,6 +127,13 @@ int index_status(const Index *index) {
 
 // ─── TODO: Implement these ───────────────────────────────────────────────────
 
+// Compare function for qsort: sorts IndexEntry by path (lexicographically)
+static int compare_index_entries(const void *a, const void *b) {
+    const IndexEntry *entry_a = (const IndexEntry *)a;
+    const IndexEntry *entry_b = (const IndexEntry *)b;
+    return strcmp(entry_a->path, entry_b->path);
+}
+
 // Load the index from .pes/index.
 //
 // HINTS - Useful functions:
