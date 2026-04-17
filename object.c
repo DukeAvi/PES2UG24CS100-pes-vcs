@@ -94,8 +94,22 @@ int object_exists(const ObjectID *id) {
 //
 // Returns 0 on success, -1 on error.
 int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out) {
-    // TODO: Implement
-    (void)type; (void)data; (void)len; (void)id_out;
+    if (!id_out) return -1;
+    if (!data && len > 0) return -1;
+
+    const char *type_str = NULL;
+    if (type == OBJ_BLOB) {
+        type_str = "blob";
+    } else if (type == OBJ_TREE) {
+        type_str = "tree";
+    } else if (type == OBJ_COMMIT) {
+        type_str = "commit";
+    } else {
+        return -1;
+    }
+
+    (void)type_str;
+    
     return -1;
 }
 
