@@ -203,5 +203,10 @@ int commit_create(const char *message, ObjectID *commit_id_out) {
         return -1;
     }
 
-    (void)tree_id;
+    Commit commit;
+    memset(&commit, 0, sizeof(commit));
+    commit.tree = tree_id;
+
+    const int parent_found = (head_read(&commit.parent) == 0);
+    commit.has_parent = parent_found ? 1 : 0;
 }
